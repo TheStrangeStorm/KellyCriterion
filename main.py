@@ -28,7 +28,7 @@ def kelly_criterion(p, b):
 
 	return p - (1 - p) / b
 
-def accumulate_bets(bankroll):
+def accumulate_bets(bankroll, baseline=1):
 	working_bankroll = bankroll
 	this_day = 0
 	ev = 0
@@ -40,7 +40,7 @@ def accumulate_bets(bankroll):
 	while ev < 90 or this_day < bets_per_day:
 		fair_odds = random.uniform(1.05, 2)
 		#overvalue = random.uniform(1, 1.1)
-		overvalue = 0.2 * math.exp(-this_day) + 1
+		overvalue = 0.2 * math.exp(-this_day) + baseline
 		#overvalue = 1.2
 
 		odds = fair_odds * overvalue
@@ -48,6 +48,8 @@ def accumulate_bets(bankroll):
 		p = 1 / fair_odds
 		b = odds - 1
 		stake = kelly_criterion(p, b) * working_bankroll * 1
+
+		# print(f"{stake:.2f} {this_day}")
 
 		if stake < 1:
 			break
@@ -62,6 +64,8 @@ def accumulate_bets(bankroll):
 
 		this_day += 1
 
+	print("")
+
 	for i in range(len(stakes)):
 		bankroll += bet(probabilities[i], ratios[i], stakes[i])
 
@@ -69,9 +73,8 @@ def accumulate_bets(bankroll):
 
 
 bankroll = 1000
-tolerance = 1000
 n = 30
-bets_per_day = 20
+bets_per_day = 40
 
 x = []
 y = []
@@ -82,7 +85,7 @@ bet_list = []
 debt = 0
 
 for i in range(n):
-	bankroll, this_day = accumulate_bets(bankroll)
+	bankroll, this_day = accumulate_bets(bankroll, 1.03)
 
 	if bankroll < 1000:
 		bankroll += 1000 # get some extra help
